@@ -81,11 +81,6 @@ str(survey_df)
 ```{r}
 summary(survey_df)
 ```
-```{r}
-# survey_df |>
-#  filter(Age >= 10 & Age <= 100) |>
-#  filter(WorkWeekHrs <= 140) -> survey_df
-```
 
 ```{r}
 survey_df |>
@@ -158,13 +153,46 @@ survey_df |>
   ylab("Number of respondents")
 ```
 
+It appears that a large percentage of respondents are 20-45 years old. It's somewhat representative of the programming community in general. Many young people have taken up computer science as their field of study or profession in the last 20 years.
 
+Exercise: You may want to filter out responses by age (or age group) if you'd like to analyze and compare the survey results for different age groups. Create a new column called AgeGroup containing values like Less than 10 years, 10-18 years, 18-30 years, 30-45 years, 45-60 years and Older than 60 years. Then, repeat the analysis in the rest of this notebook for each age group.
 
+```{r}
+survey_df |>
+  mutate(AgeGroup = case_when(
+    Age < 18 ~ "Younger than 18",
+    Age >= 18 & Age <= 25 ~ "18-25 years",
+    Age > 25 & Age <= 35 ~ "26-35 years",
+    Age > 35 & Age <= 45 ~ "36-45 years",
+    Age > 45 & Age <= 55 ~ "46-55 years",
+    TRUE ~ "Older than 55"
+  )) -> survey_agegroup_df
+survey_agegroup_df
+```
 
+```{r}
+survey_df |>
+  na.omit() |>
+  summarise(Age = n(), .by = Gender)
+```
 
-
-
-
+```{r}
+survey_df |>
+  drop_na() |>
+  summarise(Age = n(), .by = Gender) |>
+  mutate(Percentage = Age / sum(Age)) |>
+  mutate(labels = scales::percent(Percentage)) -> survey_df_percent_age
+survey_df_percent_age |>
+  ggplot(aes(x="", y=Percentage, fill = Gender)) +
+	geom_col() +
+	coord_polar(theta = "y") +
+  geom_text(aes(label = labels), position = position_stack(vjust = 0.5)) +
+  theme(axis.text=element_blank(), 
+        axis.ticks = element_blank(), 
+        panel.grid  = element_blank()) +
+  xlab("") +
+  ylab("Percentage of responses")
+```
 
 
 
